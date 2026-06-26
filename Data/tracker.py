@@ -234,7 +234,7 @@ class ProgressTracker:
 
         print("\033[36m\t project(project_name, total_tasks)\033[0m: This eases the whole process. You just have to call the function with name number of tasks. And above mentioned methods will be done for you.")
 
-print("use help() for function usage details.")
+
 if __name__ == "__main__":
     tracker = ProgressTracker()
     tracker.load("progress.npy") # Load previous progress if available
