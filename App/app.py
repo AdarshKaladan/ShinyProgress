@@ -143,6 +143,7 @@ def server(input, output, session):
             ui.update_action_button("start_btn", disabled=False)
             ui.update_action_button("done_btn", disabled=True)
             ui.update_action_button("end_btn", disabled=True)
+            ui.update_select("project_select", choices=tasklist(), selected=project.name)
         
         refresh_trigger.set(refresh_trigger.get()+1)
 
@@ -154,6 +155,7 @@ def server(input, output, session):
         ui.update_action_button("start_btn", disabled=False)
         ui.update_action_button("done_btn", disabled=True)
         ui.update_action_button("end_btn", disabled=True)
+        ui.update_select("project_select", choices=tasklist(), selected=project.name)
         refresh_trigger.set(refresh_trigger.get()+1)
 
 
