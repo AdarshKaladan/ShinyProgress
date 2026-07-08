@@ -5,7 +5,7 @@ A simple, lightweight web application built with Shiny for Python to help track 
 ## Features
 
 This application provides an interactive web dashboard, with the option to choose dark mode, accessible from your computer or any device on your local network.
-![App Screenshot](Data/screenshot.png)
+![App Screenshot](Data/Screenshot.png)
  As you complete tasks, it automatically generates and updates a live progress chart. To ensure you never lose your data, the app manages your sessions by saving your progress locally as `.npy` binary files, allowing you to seamlessly pick up right where you left off. It features smart time tracking—letting you choose whether to include or omit break times when resuming a session—and will dynamically rescale your historical data if you decide to change your total task goal mid-project. Furthermore, whenever you end a series, the tracker automatically saves a high-resolution `.png` snapshot of your final chart alongside your data files.
  ![Saved chart](Data/A2.png)
  All of this is monitored through a minimal, color-coded logging terminal that highlights important metrics in real-time.
