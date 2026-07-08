@@ -121,7 +121,7 @@ class ProgressTracker:
         plt.savefig(self.data_path + self.name+".png", dpi=300)
         plt.clf()
 
-        self.log(f"The current progress has been saved at {self.name}.npy and plotted at {self.name}.png successfully. Start new project from the sidebar")
+        self.log(f"The current progress ({str(self.tasks[-1])} tasks in {self.adj_times[-1]:.2f} {self.time_unit}) has been saved at {self.name}.npy and plotted at {self.name}.png successfully. Start new project from the sidebar")
 
 
     def load(self):
