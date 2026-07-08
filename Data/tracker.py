@@ -140,7 +140,7 @@ class ProgressTracker:
             self.original_start_time = loaded_data['original_start_time']
             self.relative_start_time = time.time() - self.times[-1]
             self.unit_scale()
-            self.log(f"The file {self.name}.npy has been loaded successfully")
+            self.log(f"The file {self.name}.npy has been loaded successfully. Currently sitting at task {str(self.tasks[-1])} with {self.adj_times[-1]:.2f} {self.time_unit}")
             return True
         except FileNotFoundError:
             self.values = [0]
