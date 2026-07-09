@@ -6,15 +6,8 @@ from shiny import ui, reactive
 class ProgressTracker:
     def __init__(self, name="Progress", total_tasks=10, data_path="../Data"): #input, output, session, logs, name):
         """
-        Initializes the ProgressTracker with empty lists for values and times.
+        Initializes the ProgressTracker with empty lists or starters for values, times, and whatnot.
         """
-        # Shiny env related
-        #self.input = input
-        #self.output = output
-        #self.session = session
-        #self.logs = logs
-
-        # Task related
         self.values = [0]
         self.tasks = [0]
         self.total_tasks = total_tasks
@@ -29,11 +22,8 @@ class ProgressTracker:
 
     def task_done(self):
         """
-        Records a numerical value with the current timestamp relative to the start time.
-
-        Args:
-            value (float): The numerical percentage value to record.
-            tasks (float): The number of tasks done to be recorded.
+        When called, it adds the next number to the task list, calculate the percentage wrt total tasks and stores it in values 
+        list, and also records the time when all of this happened.
         """
         
         self.tasks.append(self.tasks[-1] + 1)
@@ -44,6 +34,10 @@ class ProgressTracker:
         self.log(f"Recorded the value {self.values[-1]:.2f}% for task number {str(self.tasks[-1])} at {self.adj_times[-1]:.2f} {self.time_unit}")
     
     def unit_scale(self):
+        """"
+        This function scales the time list with a multiplier depending on the highest number for changing the unit between 
+        seconds, minutes, and hours.
+        """
         if self.times[-1]>8000:    
             self.adj_times = [i/3600 for i in self.times]
             self.time_unit = "hours"
@@ -54,10 +48,21 @@ class ProgressTracker:
             self.adj_times = self.times
 
     def log(self, msg):
+        """
+        Adds a log message into a list of strings of logs
+        Args:
+            msg (str): the text that needs to be added to the logs
+        """
         self.logs.append(msg)
     
     def get_plot(self, theme):
-        """Builds the plot using the class's current state."""
+        """
+        Returns a plot using the current values.
+        Args:
+            theme (str): if "dark" the plot will use dark mode
+        Returns:
+            matplotlib Figure: a matplotlib figure that shiny can display as an image
+        """
         if theme == "dark":
             plt.style.use('dark_background')
         else:
@@ -73,12 +78,10 @@ class ProgressTracker:
         ax.spines['right'].set_visible(False)
         return fig
 
-    def save(self, max_limit=0):
+    def save(self):
         """
-        Plots the recorded values against time.
-
-        Args:
-            max_limit (int, optional): Maximum limit for the y-axis. Defaults to 0 (auto-scaling).
+        When called, it converts the recorded values into a dictionary and saves it as a numpy file. It also plots the recorded percentage 
+        values against their corresponding time taken and saves it in a png file.
         """
         progress_data = {
             'values': self.values,
@@ -126,11 +129,9 @@ class ProgressTracker:
 
     def load(self):
         """
-        Loads progress (values and times) from a numpy file.
-        If the file is not found or data is invalid, it starts fresh.
-
-        Args:
-            filename (str, optional): The name of the file to load from. Defaults to "progress.npy".
+        Loads a previously saved progress from a numpy file.
+        If the file is not found or data is invalid, it resets the time and starts fresh.
+        Besides, a boolean value is returned depending on whether the action was succesful or not.
         """
         try:
             loaded_data = np.load(self.data_path+self.name+".npy", allow_pickle=True).item()
@@ -140,7 +141,7 @@ class ProgressTracker:
             self.original_start_time = loaded_data['original_start_time']
             self.relative_start_time = time.time() - self.times[-1]
             self.unit_scale()
-            self.log(f"The file {self.name}.npy has been loaded successfully. Currently sitting at task {str(self.tasks[-1])} with {self.adj_times[-1]:.2f} {self.time_unit}")
+            self.log(f"The file {self.name}.npy has been loaded successfully. Currently sitting at task {str(self.tasks[-1])} using {self.adj_times[-1]:.2f} {self.time_unit}")
             return True
         except FileNotFoundError:
             self.values = [0]
@@ -148,14 +149,29 @@ class ProgressTracker:
             self.tasks = [0]
             self.original_start_time = time.time()
             self.relative_start_time = time.time()
-            self.log(f"Given filename: {self.data_path+self.name}.npy is not found, hence the process is starting fresh with zero values while current time is used as original time")
+            self.log(f"A fresh new project is created using zero value and current time as starting time with the name {self.name}")
         return False
     
     def mismatch(self):
+        """
+        Returns a boolean value after checking if the total task count obtained when the class was initiated matches the total task 
+        count that can be calculated from previously recorded progress
+        """
         return self.values[-1] != (self.tasks[-1]*100/self.total_tasks)
     
-    def rescale(self):
-        multiplier = (self.tasks[-1]*100/self.total_tasks)/self.values[-1]
-        self.values = [i*multiplier for i in self.values]
-        self.log(f"Values has been successfully rescaled for {self.total_tasks}")
-            
+    def rescale(self, rescale=True):
+        """
+        if there was a mismatch between the initialised total tasks count and the one from previously recorded progress, this one 
+        will rescale the values to make sure the initialised task count is the valid one. If there was no mismatch, it simply rewrites 
+        the task count with the previously recorded one.
+        Args:
+            rescale (Bool): the flag that tell the function whether to rescale or not. by default it's True.
+        """
+        if rescale:
+            multiplier = (self.tasks[-1]*100/self.total_tasks)/self.values[-1]
+            self.values = [i*multiplier for i in self.values]
+            self.log(f"Values has been successfully rescaled for {self.total_tasks}")
+        else:
+            self.total_tasks = int(self.tasks[-1]*100/self.values[-1])
+            self.log(f"The values are not rescaled, but total task count has been successfully changed to {self.total_tasks}")
+                

@@ -74,8 +74,8 @@ def server(input, output, session):
                 "green" if "successfully" in msg else \
                 "lightblue" if "Recorded" in msg and input.theme() == "dark" else \
                 "darkblue" if "Recorded" in msg else \
-                "salmon" if "not found" in msg and input.theme() == "dark" else \
-                "red" if "not found" in msg else \
+                "salmon" if "fresh" in msg and input.theme() == "dark" else \
+                "red" if "fresh" in msg else \
                 "lightgray" if input.theme() == "dark" else "#212529"
         
         bgcolor = "#212529" if input.theme() == "dark" else "#ECECEC"
@@ -125,6 +125,8 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.mismatch_dismiss)
     def _():
+        project.rescale(rescale=False)
+        refresh_trigger.set(refresh_trigger.get()+1)
         ui.modal_remove()
 
     @reactive.effect
