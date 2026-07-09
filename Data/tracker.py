@@ -1,12 +1,30 @@
 import matplotlib.pyplot as plt
 import time
 import numpy as np
-from shiny import ui, reactive
 
 class ProgressTracker:
-    def __init__(self, name="Progress", total_tasks=10, data_path="../Data"): #input, output, session, logs, name):
+    """
+    A lightweight utility to track and plot your progress in completing a task over time. 
+    Attributes:
+        name (str)                  : Name of the project.
+        total_tasks (int)           : No. of tasks in the project.
+        data_path (str)             : Path to the directory where the progress needs to be saved.
+        tasks (list of int)         : List of tasks completed used to log and mark the milestones.
+        values (list of float)      : List of percentage of task completed used to plot and log.
+        times (list of float)       : List of raw elapsed timestamps corresponding to tasks and values.
+        adj_times (list of float)   : List of elapsed timestamps that are scaled for readability wrt time units.
+        time_unit (str)             : The unit of time for which the adj_time is scaled for.
+        original_start_time (float) : History timestamp when the project originally started.
+        relative_start_time (float) : Starting timestamp adjusted for breaks.
+        logs (list of str)          : List of log messages recording different steps in the tracking process
+    """
+    def __init__(self, name="Progress", total_tasks=10, data_path="../Data"):
         """
         Initializes the ProgressTracker with empty lists or starters for values, times, and whatnot.
+        Args:
+            name (str)          : Name of the project, which will be used in plots and as filename for saving and loading progress.
+            total_tasks (int)   : Total number of tasks the project has.
+            data_path (str)     : Path to the directory where the progress needs to be saved.
         """
         self.values = [0]
         self.tasks = [0]
@@ -61,7 +79,7 @@ class ProgressTracker:
         Args:
             theme (str): if "dark" the plot will use dark mode
         Returns:
-            matplotlib Figure: a matplotlib figure that shiny can display as an image
+            matplotlib Figure: a matplotlib figure containing the plot that shiny can display as an image
         """
         if theme == "dark":
             plt.style.use('dark_background')
@@ -129,9 +147,9 @@ class ProgressTracker:
 
     def load(self):
         """
-        Loads a previously saved progress from a numpy file.
-        If the file is not found or data is invalid, it resets the time and starts fresh.
-        Besides, a boolean value is returned depending on whether the action was succesful or not.
+        The function either loads a previously saved progress with the same name given, or resets the time and values.
+        Returns:
+            Bool: Boolean value depending on whether the loading was successful or not
         """
         try:
             loaded_data = np.load(self.data_path+self.name+".npy", allow_pickle=True).item()
@@ -155,7 +173,7 @@ class ProgressTracker:
     def mismatch(self):
         """
         Returns a boolean value after checking if the total task count obtained when the class was initiated matches the total task 
-        count that can be calculated from previously recorded progress
+        count that can be calculated from previously recorded progress.
         """
         return self.values[-1] != (self.tasks[-1]*100/self.total_tasks)
     
@@ -166,12 +184,16 @@ class ProgressTracker:
         the task count with the previously recorded one.
         Args:
             rescale (Bool): the flag that tell the function whether to rescale or not. by default it's True.
+        Returns:
+            Int: the total task count, either the initialised one or the calculated one depending on the argument.
         """
         if rescale:
             multiplier = (self.tasks[-1]*100/self.total_tasks)/self.values[-1]
             self.values = [i*multiplier for i in self.values]
             self.log(f"Values has been successfully rescaled for {self.total_tasks}")
+            return self.total_tasks
         else:
             self.total_tasks = int(self.tasks[-1]*100/self.values[-1])
             self.log(f"The values are not rescaled, but total task count has been successfully changed to {self.total_tasks}")
+            return self.total_tasks
                 

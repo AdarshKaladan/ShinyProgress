@@ -16,12 +16,13 @@ app_ui = ui.page_sidebar(
         ui.h3("Configuration"),
         ui.input_select("project_select", "Select Project", choices=tasklist()),
         
-        # This text input only displays when "Create new..." is selected
+        # This text input only displays when "Create new..." is selected (default)
         ui.panel_conditional(
             "input.project_select == 'Create New.'",
             ui.input_text("new_proj_name", "New Project Name", value="")
         ),
-        
+        # When it's not "Create new..." (default), the following switch appears as it means it's a continuation
+        # of a previously created project.
         ui.panel_conditional(
             "input.project_select != 'Create New.'",
             ui.input_switch("time_correct", "Break Time Exclusion", True)
@@ -61,11 +62,18 @@ def server(input, output, session):
 
     @render.plot
     def progress_plot():
+        """
+        Returns the plot of the current state of the project, when the refresh_trigger value is changed somewhere.
+        """
         refresh_trigger.get()
         return project.get_plot(theme = input.theme())
     
     @render.text
     def status_log():
+        """
+        Returns a string of the last log message from the project, which is formatted according to the content 
+        and the theme selected by the user in the UI.
+        """
         refresh_trigger.get()
         #return project.logs[-1]
         
@@ -91,6 +99,9 @@ def server(input, output, session):
     
     @render.text
     def timer_display():
+        """
+        Returns a string of text containing a timer that runs between tasks.
+        """
         color = "lightblue" if input.theme() == "dark" else "darkblue"
         bgcolor = "#212529" if input.theme() == "dark" else "#ECECEC"
         # If a session isn't running, keep it flat at zero
@@ -117,6 +128,9 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.start_btn)
     def loading():
+        """
+        The function that starts the progress tracking based on the information from the config panel.
+        """
         nonlocal project
         if input.project_select() == "Create New.":
             project = ProgressTracker(input.new_proj_name(), input.total_tasks(), str(data_path))
@@ -126,6 +140,7 @@ def server(input, output, session):
         if input.project_select() != "Create New." and not input.time_correct():
             project.relative_start_time = project.original_start_time
         
+        # Block of code that resolves a mismatch in the total task count, if any
         if project.mismatch():
             ui.modal_show(
                 ui.modal(
@@ -139,6 +154,8 @@ def server(input, output, session):
                 )
             )
         
+        # Once the process starts, the start button should be greyed out to avoild conflicts and loss of data.
+        # While other buttons and the timer needs to be active to track the progress.
         ui.update_action_button("start_btn", disabled=True)
         ui.update_action_button("done_btn", disabled=False)
         ui.update_action_button("end_btn", disabled=False)
@@ -149,6 +166,10 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.mismatch_rescale)
     def _():
+        """
+        Just a placeholder function to initiate a rescale and closing the pop-up window when a mismatch is found in the
+        total_tasks of the project.
+        """
         project.rescale()
         refresh_trigger.set(refresh_trigger.get()+1)
         ui.modal_remove()
@@ -156,13 +177,21 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.mismatch_dismiss)
     def _():
-        project.rescale(rescale=False)
+        """
+        Just a placeholder function to dismiss a rescale, restore old data, and closing the pop-up window when a mismatch is found
+        in the total_tasks of the project.
+        """
+        count = project.rescale(rescale=False)
         refresh_trigger.set(refresh_trigger.get()+1)
+        ui.update_numeric("total_tasks", value=count)
         ui.modal_remove()
 
     @reactive.effect
     @reactive.event(input.done_btn)
     def task_done():
+        """
+        The function that deals with what happens when a task is completed (updating data) and if that task was the last task.
+        """
         project.task_done()
         if project.tasks[-1] >= project.total_tasks:
             ui.modal_show(
@@ -186,6 +215,9 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.end_btn)
     def task_break():
+        """
+        The function that deals with what happens when it's break time. It stops progress and saves progress.
+        """
         project.save()
         ui.update_action_button("start_btn", disabled=False)
         ui.update_action_button("done_btn", disabled=True)
