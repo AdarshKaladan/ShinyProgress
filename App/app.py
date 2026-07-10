@@ -2,6 +2,7 @@
 import sys, time
 from pathlib import Path
 from shiny import ui, render, reactive, App, run_app
+from faicons import icon_svg
 
 # Importing the task manager package
 data_path = Path(__file__).resolve().parent.parent / "Data"
@@ -30,7 +31,7 @@ app_ui = ui.page_sidebar(
         
         ui.input_numeric("total_tasks", "Total Tasks", value=10, min=1),
         ui.hr(),
-        ui.input_action_button("start_btn", "Start Series", class_="btn-primary w-100"),
+        ui.toolbar_input_button("start_btn", "Start Series", icon=icon_svg("hourglass-start"), show_label=True, class_="btn-primary w-100"),
         ui.input_dark_mode(id="theme")
     ),
     
@@ -38,8 +39,8 @@ app_ui = ui.page_sidebar(
     ui.layout_columns(
         ui.card(
             ui.card_header("Series Controls & Status"),
-            ui.input_action_button("done_btn", "Task Completed", class_="btn-success w-100 mb-2", disabled=True),
-            ui.input_action_button("end_btn", "End Series & Save", class_="btn-danger w-100 mb-3", disabled=True),
+            ui.toolbar_input_button("done_btn", "Task Completed", icon=icon_svg("square-check"), show_label=True, class_="btn-success w-100 mb-2", disabled=True),
+            ui.toolbar_input_button("end_btn", "End Series & Save", icon=icon_svg("heart-crack"), show_label=True, class_="btn-danger w-100 mb-3", disabled=True),
             ui.hr(),
             ui.output_ui("status_log"),
             ui.output_ui("timer_display"),
@@ -107,7 +108,7 @@ def server(input, output, session):
         # If a session isn't running, keep it flat at zero
         if not timer_active.get():
             return ui.div(
-                ui.span("⏱ Task Timer: 00:00:00", style=f"color: {color}; font-weight: bold; font-family: monospace; font-size: 1.1em;"),
+                ui.span("⏱ Task Stopwatch: 00:00:00", style=f"color: {color}; font-weight: bold; font-family: monospace; font-size: 1.1em;"),
                 style=f"background-color: {bgcolor}; padding: 12px; border-radius: 6px; text-align: center;"
             )
         
@@ -118,7 +119,7 @@ def server(input, output, session):
         elapsed_seconds = int(time.time() - last_task_time.get())
         hours, remainder = divmod(elapsed_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-        msg = f"⏱ Task Timer: {hours:02d}:{minutes:02d}:{seconds:02d}"
+        msg = f"⏱ Task stopwatch: {hours:02d}:{minutes:02d}:{seconds:02d}"
         
         return ui.div(
             ui.span(msg, style=f"color: {color}; font-weight: bold; font-family: monospace; font-size: 1.1em;"),
@@ -148,8 +149,8 @@ def server(input, output, session):
                     f"Found: {(project.tasks[-1]*100/project.values[-1]):.2f}, \nGot:{str(project.total_tasks)}",
                     title="Total Task Count Mismatch",
                     footer=ui.div(
-                        ui.input_action_button("mismatch_rescale", "Rescale", class_="btn-warning"),
-                        ui.input_action_button("mismatch_dismiss", "Dismiss", class_="btn-light"),
+                        ui.toolbar_input_button("mismatch_rescale", "Rescale", icon=icon_svg("ruler"), show_label=True, class_="btn-warning"),
+                        ui.toolbar_input_button("mismatch_dismiss", "Dismiss", icon=icon_svg("square-xmark"), show_label=True, class_="btn-light"),
                     ), easy_close=False
                 )
             )

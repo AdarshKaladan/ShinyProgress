@@ -29,7 +29,7 @@ To keep things organized, the project is split into two main directories:
 1. **Install Requirements:** Make sure you have the required Python libraries installed:
 
     ```bash
-    pip install shiny matplotlib numpy
+    pip install shiny matplotlib numpy faicons
     ```
 
 2. **Start the App:** Navigate to the project folder and run the `app.py` script:
@@ -38,7 +38,7 @@ To keep things organized, the project is split into two main directories:
     python App/app.py
     ```
 
-3. **Access the Dashboard:** * On your computer: Open a web browser and go to `http://localhost:8000`
+3. **Access the Dashboard:** * On your computer: Open a web browser and go to `http://localhost:8000`or `http://127.0.0.1:8000`
     * On your phone/tablet: Find your computer's local IP address (e.g., `192.168.1.x`) and visit `http://192.168.1.x:8000`.
 
 ## How to Use
