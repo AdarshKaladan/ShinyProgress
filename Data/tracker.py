@@ -142,7 +142,7 @@ class ProgressTracker:
         plt.savefig(self.data_path + self.name+".png", dpi=300)
         plt.clf()
 
-        self.log(f"The current progress ({str(self.tasks[-1])} tasks in {self.adj_times[-1]:.2f} {self.time_unit}) has been saved at {self.name}.npy and plotted at {self.name}.png successfully. Start new project from the sidebar")
+        self.log(f"The current progress ({str(self.tasks[-1])} tasks ({self.values[-1]:.2f}%) in {self.adj_times[-1]:.2f} {self.time_unit}) has been saved at {self.name}.npy and plotted at {self.name}.png successfully. Start new project from the sidebar")
 
 
     def load(self):
@@ -159,7 +159,7 @@ class ProgressTracker:
             self.original_start_time = loaded_data['original_start_time']
             self.relative_start_time = time.time() - self.times[-1]
             self.unit_scale()
-            self.log(f"The file {self.name}.npy has been loaded successfully. Currently sitting at task {str(self.tasks[-1])} using {self.adj_times[-1]:.2f} {self.time_unit}")
+            self.log(f"The file {self.name}.npy has been loaded successfully. Currently sitting at task {str(self.tasks[-1])} ({self.values[-1]:.2f}%) using {self.adj_times[-1]:.2f} {self.time_unit}")
             return True
         except FileNotFoundError:
             self.values = [0]
